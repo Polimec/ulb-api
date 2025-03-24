@@ -1,6 +1,11 @@
 import { DurableObject } from "cloudflare:workers";
 import { generate } from "@babia/uuid-v7";
-import { dot, polimec, XcmV3Junctions } from "@polkadot-api/descriptors";
+import {
+  dot,
+  hydration,
+  polimec,
+  XcmV3Junctions,
+} from "@polkadot-api/descriptors";
 import {
   type PolkadotClient,
   type SS58String,
@@ -15,8 +20,13 @@ import { Balance } from "../Balance";
 export class Listener extends DurableObject<Env> {
   private polkadotClient: PolkadotClient;
   private polkadotApi: TypedApi<typeof dot>;
+
   private polimecClient: PolkadotClient;
   private polimecApi: TypedApi<typeof polimec>;
+
+  private hydrationClient: PolkadotClient;
+  private hydrationApi: TypedApi<typeof hydration>;
+
   private balance: Balance;
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -30,10 +40,17 @@ export class Listener extends DurableObject<Env> {
       )
     );
     this.polkadotApi = this.polkadotClient.getTypedApi(dot);
+
     this.polimecClient = createClient(
       withPolkadotSdkCompat(getWsProvider(["wss://rpc.polimec.org"]))
     );
     this.polimecApi = this.polimecClient.getTypedApi(polimec);
+
+    this.hydrationClient = createClient(
+      withPolkadotSdkCompat(getWsProvider(["wss://hydration.ibp.network"]))
+    );
+    this.hydrationApi = this.hydrationClient.getTypedApi(hydration);
+
     this.balance = new Balance();
   }
 
@@ -49,10 +66,12 @@ export class Listener extends DurableObject<Env> {
     ).subscribe({
       next: (content) => {
         try {
-          this.balance.setPolkadot(content.data.free);
-          const total = this.balance.total();
-          const message = new SSEMessage(total, "DOT", generate());
-          writer.write(message.encode());
+          if (content.data.free > 0n) {
+            this.balance.setPolkadot(content.data.free);
+            const total = this.balance.total();
+            const message = new SSEMessage(total, "DOT", generate());
+            writer.write(message.encode());
+          }
         } catch (err) {
           console.error(
             "Failed to write Polkadot balance update to stream:",
@@ -81,10 +100,12 @@ export class Listener extends DurableObject<Env> {
               console.error("Polimec content is undefined");
               return;
             }
-            this.balance.setPolimec(content.balance);
-            const total = this.balance.total();
-            const message = new SSEMessage(total, "DOT", generate());
-            writer.write(message.encode());
+            if (content.balance > 0n) {
+              this.balance.setPolimec(content.balance);
+              const total = this.balance.total();
+              const message = new SSEMessage(total, "DOT", generate());
+              writer.write(message.encode());
+            }
           } catch (err) {
             console.error(
               "Failed to write Polimec balance update to stream:",
@@ -99,6 +120,40 @@ export class Listener extends DurableObject<Env> {
         complete: () => {
           console.log("Polimec observable completed");
           polimecSubscription.unsubscribe();
+        },
+      });
+
+    const hydrationSubscription =
+      this.hydrationApi.query.Tokens.Accounts.watchValue(
+        accountId,
+        5
+      ).subscribe({
+        next: (content) => {
+          try {
+            if (!content) {
+              console.error("Hydration content is undefined");
+              return;
+            }
+            if (content.free > 0n) {
+              this.balance.setHydration(content.free);
+              const total = this.balance.total();
+              const message = new SSEMessage(total, "DOT", generate());
+              writer.write(message.encode());
+            }
+          } catch (err) {
+            console.error(
+              "Failed to write Hydration balance update to stream:",
+              err
+            );
+          }
+        },
+        error: (err) => {
+          console.error("Hydration observable error:", err);
+          hydrationSubscription.unsubscribe();
+        },
+        complete: () => {
+          console.log("Hydration observable completed");
+          hydrationSubscription.unsubscribe();
         },
       });
 
