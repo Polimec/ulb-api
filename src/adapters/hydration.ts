@@ -66,13 +66,8 @@ export class HydrationAdapter extends BaseChainAdapter {
       this.api.query.Tokens.Accounts.watchValue(accountId, this.tokenId),
     ).pipe(
       filter((content): content is NonNullable<typeof content> => content !== undefined),
-      map((account) => {
-        // Only emit if there's a positive balance
-        if (account.free > 0n) {
-          return account.free;
-        }
-        return 0n;
-      }),
+      map((account) => account.free),
+      filter((balance) => balance > 0n),
       catchError((error) => {
         this.logError(`Error watching balance for ${accountId}`, error);
         throw error;

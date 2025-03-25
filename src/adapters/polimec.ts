@@ -64,13 +64,8 @@ export class PolimecAdapter extends BaseChainAdapter {
       ),
     ).pipe(
       filter((content): content is NonNullable<typeof content> => content !== undefined),
-      map((account) => {
-        // Only emit if there's a positive balance
-        if (account.balance > 0n) {
-          return account.balance;
-        }
-        return 0n;
-      }),
+      map((account) => account.balance),
+      filter((balance) => balance > 0n),
       catchError((error) => {
         this.logError(`Error watching balance for ${accountId}`, error);
         throw error;

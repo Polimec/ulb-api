@@ -3,7 +3,7 @@ import { type PolkadotClient, type SS58String, type TypedApi, createClient } fro
 import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 import { getWsProvider } from 'polkadot-api/ws-provider/web';
 import { type Observable, from } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, filter, map } from 'rxjs/operators';
 import { BaseChainAdapter } from './base';
 
 /**
@@ -58,13 +58,8 @@ export class PolkadotAdapter extends BaseChainAdapter {
 
     // Create an observable from the Polkadot API
     const balanceObservable = from(this.api.query.System.Account.watchValue(accountId)).pipe(
-      map((account) => {
-        // Only emit if there's a positive balance
-        if (account.data.free > 0n) {
-          return account.data.free;
-        }
-        return 0n;
-      }),
+      map((account) => account.data.free),
+      filter((balance) => balance > 0n),
       catchError((error) => {
         this.logError(`Error watching balance for ${accountId}`, error);
         throw error;
