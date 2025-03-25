@@ -44,18 +44,17 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1qnJN7FViy3HZaxZK9tGAA71zxHSBeUweirKqCaox4t8GT7"
+              "examples": ["1qnJN7FViy3HZaxZK9tGAA71zxHSBeUweirKqCaox4t8GT7"]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Server-Sent Events stream established successfully.\n\nThe stream emits the following event types:\n- `accountId`: Sent when the connection is established, contains the account being monitored\n- `DOT`: Sent when the total balance changes across any chain, contains the total balance in DOT\n- `heartbeat`: Sent every 30 seconds to keep the connection alive\n",
+            "description": "Server-Sent Events stream established successfully.",
             "content": {
               "text/event-stream": {
                 "schema": {
-                  "type": "string",
-                  "format": "binary"
+                  "$ref": "#/components/schemas/EventStream"
                 },
                 "examples": {
                   "accountIdEvent": {
@@ -91,7 +90,7 @@
               "text/plain": {
                 "schema": {
                   "type": "string",
-                  "example": "Internal Server Error"
+                  "examples": ["Internal Server Error"]
                 }
               }
             }
@@ -102,6 +101,34 @@
   },
   "components": {
     "schemas": {
+      "EventStream": {
+        "type": "object",
+        "description": "Server-Sent Events stream with different event types:\n- `accountId`: Sent when the connection is established, contains the account being monitored\n- `DOT`: Sent when the total balance changes across any chain, contains the total balance in DOT\n- `heartbeat`: Sent every 30 seconds to keep the connection alive\n",
+        "properties": {
+          "event": {
+            "type": "string",
+            "description": "The type of event",
+            "examples": ["accountId", "DOT", "heartbeat"]
+          },
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the event",
+            "examples": ["0195ce03-1fc5-7641-959f-d74c74482226"]
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "String data payload for accountId and heartbeat events"
+              },
+              {
+                "$ref": "#/components/schemas/Balance",
+                "description": "Balance information for DOT events"
+              }
+            ]
+          }
+        }
+      },
       "Balance": {
         "type": "object",
         "description": "Detailed balance information for an account across multiple chains",
@@ -109,22 +136,22 @@
           "Polkadot": {
             "type": "string",
             "description": "The balance on the Polkadot network (as a string to accommodate large integers)",
-            "example": "1250000000000"
+            "examples": ["1250000000000"]
           },
           "Polimec": {
             "type": "string",
             "description": "The balance on the Polimec network (as a string to accommodate large integers)",
-            "example": "4500000000000"
+            "examples": ["4500000000000"]
           },
           "Hydration": {
             "type": "string",
             "description": "The balance on the Hydration network (as a string to accommodate large integers)",
-            "example": "300000000000"
+            "examples": ["300000000000"]
           },
           "total": {
             "type": "string",
             "description": "The total balance across all networks (as a string to accommodate large integers)",
-            "example": "6050000000000"
+            "examples": ["6050000000000"]
           }
         }
       },
@@ -140,7 +167,7 @@
           "id": {
             "type": "string",
             "description": "A unique identifier for the event",
-            "example": "0195cdd1-1e28-773f-9d08-22a281c17000"
+            "examples": ["0195cdd1-1e28-773f-9d08-22a281c17000"]
           },
           "data": {
             "oneOf": [
@@ -155,7 +182,7 @@
                   "total": {
                     "type": "string",
                     "description": "The total balance across all chains (as a string to accommodate large integers)",
-                    "example": "6050000000000"
+                    "examples": ["6050000000000"]
                   },
                   "chains": {
                     "type": "object",
@@ -164,17 +191,17 @@
                       "Polkadot": {
                         "type": "string",
                         "description": "The balance on the Polkadot network",
-                        "example": "1250000000000"
+                        "examples": ["1250000000000"]
                       },
                       "Polimec": {
                         "type": "string",
                         "description": "The balance on the Polimec network",
-                        "example": "4500000000000"
+                        "examples": ["4500000000000"]
                       },
                       "Hydration": {
                         "type": "string",
                         "description": "The balance on the Hydration network",
-                        "example": "300000000000"
+                        "examples": ["300000000000"]
                       }
                     }
                   }
@@ -185,7 +212,7 @@
           "retry": {
             "type": "integer",
             "description": "Optional reconnection time in milliseconds",
-            "example": 3000
+            "examples": [3000]
           }
         }
       }
