@@ -1,0 +1,167 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Unified Liquidity Balance API",
+    "description": "A real-time API for monitoring account balances across multiple chains in the Polkadot ecosystem.\nThis API uses Server-Sent Events (SSE) to stream balance updates to clients, providing efficient real-time updates\nwithout the need for frequent polling.\n",
+    "version": "0.0.1",
+    "contact": {
+      "name": "API Support",
+      "url": "https://github.com/lrazovic/ula-api"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://polkadot-cloud-sse.polimec.workers.dev",
+      "description": "Production API Server"
+    },
+    {
+      "url": "http://localhost:8787",
+      "description": "Local Development Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Balance Monitoring",
+      "description": "Endpoints for monitoring account balances"
+    }
+  ],
+  "paths": {
+    "/{accountId}": {
+      "get": {
+        "summary": "Stream balance updates for a Polkadot account",
+        "description": "Establishes a Server-Sent Events (SSE) connection that streams real-time balance updates\nfor the specified account across multiple chains in the Polkadot ecosystem.\n\nThe connection remains open indefinitely and pushes updates only when balances change.\nA heartbeat is sent every 30 seconds to maintain the connection.\n",
+        "operationId": "streamBalanceUpdates",
+        "tags": ["Balance Monitoring"],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "The SS58-formatted Polkadot account address",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events stream established successfully.\n\nThe stream emits the following event types:\n- `accountId`: Sent when the connection is established, contains the account being monitored\n- `DOT`: Sent when the total balance changes across any chain, contains the total balance in DOT\n- `heartbeat`: Sent every 30 seconds to keep the connection alive\n",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                },
+                "examples": {
+                  "accountIdEvent": {
+                    "summary": "Initial connection event",
+                    "value": "event: accountId\nid: 01h7kxw2v05shfs0tjypx1twae\ndata: \"15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5\"\n"
+                  },
+                  "balanceUpdateEvent": {
+                    "summary": "Balance update event",
+                    "value": "event: DOT\nid: 01h7kxw48tcvppqfzve1tzpsrt\ndata: \"125000000000\"\n"
+                  },
+                  "heartbeatEvent": {
+                    "summary": "Heartbeat event",
+                    "value": "event: heartbeat\nid: 01h7kxw9pje4jpnhq8bdcn6s5f\ndata: \"2025-03-25T12:34:56.789Z\"\n"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing or invalid account ID",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "enum": ["Account ID is required", "Invalid Account Provided"]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Balance": {
+        "type": "object",
+        "description": "Detailed balance information for an account across multiple chains",
+        "properties": {
+          "Polkadot": {
+            "type": "string",
+            "description": "The balance on the Polkadot network (as a string to accommodate large integers)",
+            "example": "1250000000000"
+          },
+          "Polimec": {
+            "type": "string",
+            "description": "The balance on the Polimec network (as a string to accommodate large integers)",
+            "example": "4500000000000"
+          },
+          "Hydration": {
+            "type": "string",
+            "description": "The balance on the Hydration network (as a string to accommodate large integers)",
+            "example": "300000000000"
+          },
+          "total": {
+            "type": "string",
+            "description": "The total balance across all networks (as a string to accommodate large integers)",
+            "example": "6050000000000"
+          }
+        }
+      },
+      "SSEMessage": {
+        "type": "object",
+        "description": "Server-Sent Events message structure",
+        "properties": {
+          "event": {
+            "type": "string",
+            "description": "The event type",
+            "enum": ["accountId", "DOT", "heartbeat"]
+          },
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the event",
+            "example": "0195cdd1-1e28-773f-9d08-22a281c17000"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "String data payload, used for accountId and heartbeat events"
+              },
+              {
+                "type": "integer",
+                "format": "int64",
+                "description": "Numeric data payload, used for DOT events"
+              }
+            ]
+          },
+          "retry": {
+            "type": "integer",
+            "description": "Optional reconnection time in milliseconds",
+            "example": 3000
+          }
+        }
+      }
+    }
+  }
+}

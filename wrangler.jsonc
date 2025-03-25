@@ -3,9 +3,14 @@
   "name": "polkadot-cloud-sse",
   "main": "src/index.ts",
   "compatibility_date": "2025-03-21",
+  "assets": {
+    "directory": "public"
+  },
   "migrations": [
     {
-      "new_sqlite_classes": ["MyDurableObject"],
+      "new_sqlite_classes": [
+        "MyDurableObject"
+      ],
       "tag": "v1"
     }
   ],

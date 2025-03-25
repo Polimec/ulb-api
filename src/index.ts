@@ -1,13 +1,37 @@
+import { apiReference } from '@scalar/hono-api-reference';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { getSs58AddressInfo } from 'polkadot-api';
 import { Listener } from './durable';
+import { csrf } from 'hono/csrf';
+import { secureHeaders } from 'hono/secure-headers';
 
 // Create Hono app
 const app = new Hono<{ Bindings: Env }>();
 
 // Apply CORS middleware to all routes
 app.use('/*', cors());
+app.use(secureHeaders());
+app.use(csrf());
+
+app.get(
+  '/',
+  apiReference({
+    url: './openapi.json',
+    theme: 'default',
+    layout: 'modern',
+    pageTitle: 'Unified Liquidity Balance API Documentation',
+    hideDownloadButton: true,
+    defaultOpenAllTags: true,
+    tagsSorter: 'alpha',
+    hideModels: true,
+    metaData: {
+      title: 'Unified Liquidity Balance API Documentation',
+      description: 'Unified Liquidity Balance API Documentation',
+      author: 'Polimec Foundation',
+    },
+  }),
+);
 
 /**
  * Endpoint to subscribe to balance updates for an account
