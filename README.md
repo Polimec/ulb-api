@@ -84,13 +84,38 @@ This API provides several key benefits to the Polkadot ecosystem:
 Using the API is straightforward:
 
 ```javascript
-// Connect to the SSE endpoint with a Polkadot address
-const eventSource = new EventSource("https://polkadot-cloud-sse.polimec.workers.dev/15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
+// Example client-side code for handling the enhanced balance events
 
-// Listen for balance updates
+// Connect to the SSE endpoint with a Polkadot address
+const eventSource = new EventSource("https://polkadot-cloud-sse.polimec.workers.dev/1qnJN7FViy3HZaxZK9tGAA71zxHSBeUweirKqCaox4t8GT7");
+
+// Listen for balance updates - handles both the old and new format
 eventSource.addEventListener("DOT", (event) => {
-  const totalBalance = JSON.parse(event.data);
-  console.log(`Total DOT balance across all chains: ${totalBalance}`);
+  const data = JSON.parse(event.data);
+  
+  console.log(`Total DOT balance: ${data.total}`);
+  
+  // Log individual chain balances
+  console.log("Balance breakdown by chain:");
+  for (const [chain, balance] of Object.entries(data.chains)) {
+    if (BigInt(balance) > 0n) {
+      console.log(`  ${chain}: ${balance}`);
+    }
+  }
+  
+  // Example: Calculate percentage distribution
+  const total = BigInt(data.total);
+  if (total > 0n) {
+    console.log("Distribution percentages:");
+    for (const [chain, balance] of Object.entries(data.chains)) {
+      const chainBalance = BigInt(balance);
+      if (chainBalance > 0n) {
+        const percentage = Number(chainBalance * 10000n / total) / 100;
+        console.log(`  ${chain}: ${percentage.toFixed(2)}%`);
+      }
+    }
+  }
+  
 });
 
 // Handle connection status
@@ -102,6 +127,17 @@ eventSource.addEventListener("accountId", (event) => {
 eventSource.addEventListener("heartbeat", () => {
   console.log("Connection alive");
 });
+
+// Error handling
+eventSource.onerror = (error) => {
+  console.error("EventSource error:", error);
+  // Implement reconnection logic if needed
+};
+
+// Clean up when done
+function closeConnection() {
+  eventSource.close();
+}
 ```
 
 ## Future Development Plans
