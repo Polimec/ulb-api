@@ -1,10 +1,10 @@
 import { apiReference } from '@scalar/hono-api-reference';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { getSs58AddressInfo } from 'polkadot-api';
-import { Listener } from './durable';
 import { csrf } from 'hono/csrf';
 import { secureHeaders } from 'hono/secure-headers';
+import { getSs58AddressInfo } from 'polkadot-api';
+import { Listener } from './durable';
 
 // Create Hono app
 const app = new Hono<{ Bindings: Env }>();

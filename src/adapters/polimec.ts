@@ -78,10 +78,10 @@ export class PolimecAdapter extends BaseChainAdapter {
     );
 
     // Store the subscription for later cleanup
-    const subscription = balanceObservable.subscribe(
-      (balance) => this.balanceSubject.next(balance),
-      (error) => this.logError(`Subscription error for ${accountId}`, error),
-    );
+    const subscription = balanceObservable.subscribe({
+      next: (balance) => this.balanceSubject.next(balance),
+      error: (error) => this.logError(`Subscription error for ${accountId}`, error),
+    });
 
     this.subscriptions.set(`${accountId}-balance`, subscription);
 
