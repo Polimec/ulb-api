@@ -60,15 +60,15 @@
                 "examples": {
                   "accountIdEvent": {
                     "summary": "Initial connection event",
-                    "value": "event: accountId\nid: 01h7kxw2v05shfs0tjypx1twae\ndata: \"15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5\"\n"
+                    "value": "event: accountId\nid: 0195ce03-1fc5-7641-959f-d74c74482226\ndata: \"15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5\"\n"
                   },
                   "balanceUpdateEvent": {
                     "summary": "Balance update event",
-                    "value": "event: DOT\nid: 01h7kxw48tcvppqfzve1tzpsrt\ndata: \"125000000000\"\n"
+                    "value": "event: DOT\nid: 0195cdd1-1e28-773f-9d08-22a281c17000\ndata: {\"total\":\"125000000000\",\"chains\":{\"Polkadot\":\"100000000000\",\"Polimec\":\"25000000000\",\"Hydration\":\"0\"}}\n"
                   },
                   "heartbeatEvent": {
                     "summary": "Heartbeat event",
-                    "value": "event: heartbeat\nid: 01h7kxw9pje4jpnhq8bdcn6s5f\ndata: \"2025-03-25T12:34:56.789Z\"\n"
+                    "value": "event: heartbeat\nid: 0195ce03-2118-7a9a-988a-cd7c88c99f64\ndata: \"2025-03-25T12:34:56.789Z\"\n"
                   }
                 }
               }
@@ -149,9 +149,36 @@
                 "description": "String data payload, used for accountId and heartbeat events"
               },
               {
-                "type": "integer",
-                "format": "int64",
-                "description": "Numeric data payload, used for DOT events"
+                "type": "object",
+                "description": "Balance information for DOT events",
+                "properties": {
+                  "total": {
+                    "type": "string",
+                    "description": "The total balance across all chains (as a string to accommodate large integers)",
+                    "example": "6050000000000"
+                  },
+                  "chains": {
+                    "type": "object",
+                    "description": "Balance breakdown by chain",
+                    "properties": {
+                      "Polkadot": {
+                        "type": "string",
+                        "description": "The balance on the Polkadot network",
+                        "example": "1250000000000"
+                      },
+                      "Polimec": {
+                        "type": "string",
+                        "description": "The balance on the Polimec network",
+                        "example": "4500000000000"
+                      },
+                      "Hydration": {
+                        "type": "string",
+                        "description": "The balance on the Hydration network",
+                        "example": "300000000000"
+                      }
+                    }
+                  }
+                }
               }
             ]
           },

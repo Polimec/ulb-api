@@ -3,6 +3,7 @@ import type { SS58String } from 'polkadot-api';
 import { type Observable, from, fromEvent, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SSEMessage } from '../models';
+import type { BalanceUpdate } from './balance';
 
 /**
  * Configuration for the StreamService
@@ -36,7 +37,10 @@ export class StreamService {
    * @param balanceObservable An Observable of balance updates
    * @returns A ReadableStream for SSE
    */
-  createStream(accountId: SS58String, balanceObservable: Observable<bigint>): ReadableStream {
+  createStream(
+    accountId: SS58String,
+    balanceObservable: Observable<BalanceUpdate>,
+  ): ReadableStream {
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
 
@@ -46,9 +50,10 @@ export class StreamService {
 
     // Set up balance updates
     balanceObservable.subscribe({
-      next: (total) => {
+      next: (balanceUpdate) => {
         try {
-          const message = new SSEMessage(total, 'DOT', generate());
+          // Send detailed balance information with the same event name for backward compatibility
+          const message = new SSEMessage(balanceUpdate, 'DOT', generate());
           writer.write(message.encode());
         } catch (error) {
           console.error('[StreamService] Failed to write balance update:', error);

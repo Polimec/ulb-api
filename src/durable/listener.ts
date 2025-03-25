@@ -65,10 +65,10 @@ export class Listener extends DurableObject<Env> {
     // Ensure connections are initialized
     await this.initialize();
 
-    // Start watching the account's balance across all chains
-    const balanceObservable = this.balanceService.watchTotalBalance(accountId);
+    // Start watching the account's detailed balance across all chains
+    const balanceObservable = this.balanceService.watchDetailedBalance(accountId);
 
-    // Create an SSE stream with the balance updates
+    // Create an SSE stream with the detailed balance updates
     return this.streamService.createStream(accountId, balanceObservable);
   }
 

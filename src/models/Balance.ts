@@ -45,4 +45,18 @@ export class Balance {
     }
     return result;
   }
+
+  /**
+   * Get detailed balance information including total and per-chain breakdown
+   * @returns A detailed balance object
+   */
+  getDetailedBalance(): {
+    total: string;
+    chains: Record<string, string>;
+  } {
+    return {
+      total: this.getTotal().toString(),
+      chains: this.toObject(),
+    };
+  }
 }
