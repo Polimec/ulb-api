@@ -21,8 +21,9 @@ app.get("/:accountId", async (c) => {
   // 1. One is listening for on-chain storage changes. So we can have 1 DO per chain.
   // 2. The other is streaming and maintaining these changes to the client(s). So we can have 1 DO per client connected to thew DO #1.
   // Every unique ID refers to an individual instance of the Durable Object class
-  const id = c.env.LISTENER.idFromName("polkadot");
+  const id = c.env.LISTENER.idFromName("singleton");
   const stub = c.env.LISTENER.get(id);
+  
   // Methods on the Durable Object are invoked via the stub
   const rpcResponse = await stub.subscribe(accountId);
 
