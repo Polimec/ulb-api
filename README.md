@@ -41,7 +41,7 @@ src/
 ├── adapters/           # Chain-specific adapters
 ├── services/           # Core business logic
 ├── models/             # Data models
-├── durable-objects/    # Cloudflare Durable Objects
+├── durable/            # Cloudflare Durable Objects
 └── utils/              # Utility functions
 ```
 
