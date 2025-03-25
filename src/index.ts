@@ -1,29 +1,29 @@
-import { getSs58AddressInfo } from "polkadot-api";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { Listener } from "./durable";
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { getSs58AddressInfo } from 'polkadot-api';
+import { Listener } from './durable';
 
 // Create Hono app
 const app = new Hono<{ Bindings: Env }>();
 
 // Apply CORS middleware to all routes
-app.use("/*", cors());
+app.use('/*', cors());
 
 /**
  * Endpoint to subscribe to balance updates for an account
  */
-app.get("/:accountId", async (c) => {
-  const accountId = c.req.param("accountId");
+app.get('/:accountId', async (c) => {
+  const accountId = c.req.param('accountId');
 
   // Validate account ID
   if (!accountId) {
-    return c.text("Account ID is required", 400);
+    return c.text('Account ID is required', 400);
   }
 
   // Validate SS58 address format
   const { isValid } = getSs58AddressInfo(accountId);
   if (!isValid) {
-    return c.text("Invalid Account Provided", 400);
+    return c.text('Invalid Account Provided', 400);
   }
 
   try {
@@ -42,14 +42,14 @@ app.get("/:accountId", async (c) => {
     // @ts-expect-error: The DO returns a ReadableStream, and the Response constructor accepts it. TODO: Investigate why TS is complaining.
     return new Response(stream, {
       headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive"
-      }
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
     });
   } catch (error) {
-    console.error("Error setting up subscription:", error);
-    return c.text("Internal Server Error", 500);
+    console.error('Error setting up subscription:', error);
+    return c.text('Internal Server Error', 500);
   }
 });
 
