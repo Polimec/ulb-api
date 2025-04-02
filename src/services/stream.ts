@@ -1,4 +1,4 @@
-import { generate } from '@babia/uuid-v7';
+import { generate } from '@std/uuid/unstable-v7';
 import type { SS58String } from 'polkadot-api';
 import { type Observable, from, fromEvent, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';

@@ -8,15 +8,15 @@
     "lint": "biome check --write src"
   },
   "dependencies": {
-    "@babia/uuid-v7": "npm:@jsr/babia__uuid-v7",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
-    "@scalar/hono-api-reference": "^0.7.2",
+    "@scalar/hono-api-reference": "^0.7.4",
+    "@std/uuid": "npm:@jsr/std__uuid",
     "hono": "^4.7.5",
-    "polkadot-api": "^1.9.7"
+    "polkadot-api": "^1.9.9"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "wrangler": "^4.4.0"
+    "wrangler": "^4.6.0"
   },
-  "packageManager": "bun@1.2.6"
+  "packageManager": "bun@1.2.8"
 }
