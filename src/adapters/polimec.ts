@@ -22,7 +22,7 @@ export class PolimecAdapter extends BaseChainAdapter {
   /**
    * Connect to the Polimec chain
    */
-  async connect(): Promise<void> {
+  connect(): void {
     try {
       this.client = createClient(withPolkadotSdkCompat(getWsProvider(this.endpoints)));
       this.api = this.client.getTypedApi(polimec);
@@ -35,8 +35,8 @@ export class PolimecAdapter extends BaseChainAdapter {
   /**
    * Disconnect from the Polimec chain
    */
-  async disconnect(): Promise<void> {
-    await super.disconnect();
+  disconnect(): void {
+    super.disconnect();
 
     // Clean up the Polimec client
     if (this.client) {

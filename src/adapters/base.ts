@@ -9,12 +9,12 @@ export interface ChainAdapter {
   /**
    * Connect to the chain
    */
-  connect(): Promise<void>;
+  connect(): void;
 
   /**
    * Disconnect from the chain
    */
-  disconnect(): Promise<void>;
+  disconnect(): void;
 
   /**
    * Watch an account's balance
@@ -44,12 +44,12 @@ export abstract class BaseChainAdapter implements ChainAdapter {
   /**
    * Connect to the chain
    */
-  abstract connect(): Promise<void>;
+  abstract connect(): void;
 
   /**
    * Disconnect from the chain and clean up subscriptions
    */
-  async disconnect(): Promise<void> {
+  disconnect(): void {
     // Unsubscribe from all active subscriptions
     for (const subscription of this.subscriptions.values()) {
       subscription.unsubscribe();

@@ -27,7 +27,7 @@ export class HydrationAdapter extends BaseChainAdapter {
   /**
    * Connect to the Hydration chain
    */
-  async connect(): Promise<void> {
+  connect(): void {
     try {
       this.client = createClient(withPolkadotSdkCompat(getWsProvider(this.endpoints)));
       this.api = this.client.getTypedApi(hydration);
@@ -40,8 +40,8 @@ export class HydrationAdapter extends BaseChainAdapter {
   /**
    * Disconnect from the Hydration chain
    */
-  async disconnect(): Promise<void> {
-    await super.disconnect();
+  disconnect(): void {
+    super.disconnect();
 
     // Clean up the Hydration client
     if (this.client) {

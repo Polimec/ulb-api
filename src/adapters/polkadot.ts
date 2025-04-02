@@ -22,7 +22,7 @@ export class PolkadotAdapter extends BaseChainAdapter {
   /**
    * Connect to the Polkadot chain
    */
-  async connect(): Promise<void> {
+  connect(): void {
     try {
       this.client = createClient(withPolkadotSdkCompat(getWsProvider(this.endpoints)));
       this.api = this.client.getTypedApi(dot);
@@ -35,8 +35,8 @@ export class PolkadotAdapter extends BaseChainAdapter {
   /**
    * Disconnect from the Polkadot chain
    */
-  async disconnect(): Promise<void> {
-    await super.disconnect();
+  disconnect(): void {
+    super.disconnect();
 
     // Clean up the Polkadot client
     if (this.client) {
