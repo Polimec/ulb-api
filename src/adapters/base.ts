@@ -1,5 +1,5 @@
 import type { SS58String } from 'polkadot-api';
-import { type Observable, Subject, type Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /**
  * Base Chain Adapter interface that defines common functionality
@@ -19,7 +19,7 @@ export interface ChainAdapter {
   /**
    * Watch an account's balance
    * @param accountId The SS58 formatted account address
-   * @returns An Observable of balance changes
+   * @returns An Observable of balance changes for that specific account
    */
   watchBalance(accountId: SS58String): Observable<bigint>;
 
@@ -33,9 +33,6 @@ export interface ChainAdapter {
  * Base abstract class for chain adapters that implements common functionality
  */
 export abstract class BaseChainAdapter implements ChainAdapter {
-  protected balanceSubject = new Subject<bigint>();
-  protected subscriptions = new Map<string, Subscription>();
-
   /**
    * The chain's name
    */
@@ -47,23 +44,15 @@ export abstract class BaseChainAdapter implements ChainAdapter {
   abstract connect(): void;
 
   /**
-   * Disconnect from the chain and clean up subscriptions
+   * Disconnect from the chain.
+   * Adapter-specific implementations should handle client cleanup here.
    */
-  disconnect(): void {
-    // Unsubscribe from all active subscriptions
-    for (const subscription of this.subscriptions.values()) {
-      subscription.unsubscribe();
-    }
-    this.subscriptions.clear();
-
-    // Complete the balance subject
-    this.balanceSubject.complete();
-  }
+  abstract disconnect(): void;
 
   /**
    * Watch an account's balance
    * @param accountId The SS58 formatted account address
-   * @returns An Observable of balance changes
+   * @returns An Observable of balance changes for that specific account
    */
   abstract watchBalance(accountId: SS58String): Observable<bigint>;
 

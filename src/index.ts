@@ -1,7 +1,6 @@
 import { apiReference } from '@scalar/hono-api-reference';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { csrf } from 'hono/csrf';
 import { secureHeaders } from 'hono/secure-headers';
 import { getSs58AddressInfo } from 'polkadot-api';
 import { Listener } from './durable';
@@ -12,7 +11,6 @@ const app = new Hono<{ Bindings: Env }>();
 // Apply CORS middleware to all routes
 app.use('/*', cors());
 app.use(secureHeaders());
-app.use(csrf());
 
 app.get(
   '/',

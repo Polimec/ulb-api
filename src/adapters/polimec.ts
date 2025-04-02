@@ -2,7 +2,7 @@ import { XcmV3Junctions, polimec } from '@polkadot-api/descriptors';
 import { type PolkadotClient, type SS58String, type TypedApi, createClient } from 'polkadot-api';
 import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 import { getWsProvider } from 'polkadot-api/ws-provider/web';
-import { type Observable, from } from 'rxjs';
+import { EMPTY, Observable, from } from 'rxjs'; // Added EMPTY
 import { catchError, filter, map } from 'rxjs/operators';
 import { BaseChainAdapter } from './base';
 
@@ -26,6 +26,7 @@ export class PolimecAdapter extends BaseChainAdapter {
     try {
       this.client = createClient(withPolkadotSdkCompat(getWsProvider(this.endpoints)));
       this.api = this.client.getTypedApi(polimec);
+      console.log(`[${this.name}] Connected`);
     } catch (error) {
       this.logError('Failed to connect to Polimec', error);
       throw error;
@@ -36,51 +37,45 @@ export class PolimecAdapter extends BaseChainAdapter {
    * Disconnect from the Polimec chain
    */
   disconnect(): void {
-    super.disconnect();
-
-    // Clean up the Polimec client
     if (this.client) {
       this.client.destroy();
       this.client = null;
       this.api = null;
+      console.log(`[${this.name}] Disconnected`);
     }
   }
 
   /**
    * Watch an account's balance on Polimec
    * @param accountId The SS58 formatted account address
-   * @returns An Observable of balance changes
+   * @returns An Observable of balance changes for that specific account
    */
   watchBalance(accountId: SS58String): Observable<bigint> {
     if (!this.api) {
-      throw new Error(`${this.name} client not connected`);
+      console.error(`${this.name} client not connected when calling watchBalance`);
+      return new Observable((subscriber) => {
+        subscriber.error(new Error(`${this.name} client not connected`));
+      });
     }
-
-    // Create an observable from the Polimec API
     const balanceObservable = from(
       this.api.query.ForeignAssets.Account.watchValue(
         { parents: 1, interior: XcmV3Junctions.Here() },
         accountId,
       ),
     ).pipe(
-      filter((content): content is NonNullable<typeof content> => content !== undefined),
-      map((account) => account.balance),
-      filter((balance) => balance > 0n),
+      // ForeignAssets.Account returns the full account info or undefined if no account
+      // Filter out undefined cases (account doesn't exist for this asset)
+      filter(
+        (accountInfo): accountInfo is NonNullable<typeof accountInfo> => accountInfo !== undefined,
+      ),
+      map((accountInfo) => accountInfo.balance), // Extract the balance
       catchError((error) => {
-        this.logError(`Error watching balance for ${accountId}`, error);
-        throw error;
+        this.logError(`Error watching balance for ${accountId} on ${this.name}`, error);
+        throw error; // Re-throw
+        // return EMPTY;
       }),
     );
 
-    // Store the subscription for later cleanup
-    const subscription = balanceObservable.subscribe({
-      next: (balance) => this.balanceSubject.next(balance),
-      error: (error) => this.logError(`Subscription error for ${accountId}`, error),
-    });
-
-    this.subscriptions.set(`${accountId}-balance`, subscription);
-
-    // Return the subject as an observable
-    return this.balanceSubject.asObservable();
+    return balanceObservable;
   }
 }
