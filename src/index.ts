@@ -1,4 +1,4 @@
-import { apiReference } from '@scalar/hono-api-reference';
+import { Scalar } from '@scalar/hono-api-reference';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
@@ -14,7 +14,7 @@ app.use(secureHeaders());
 
 app.get(
   '/',
-  apiReference({
+  Scalar({
     url: './openapi.json',
     theme: 'default',
     layout: 'modern',
@@ -61,7 +61,6 @@ app.get('/:accountId', async (c) => {
     const stream = await stub.subscribe(accountId);
 
     // Return the stream as an SSE response
-    // @ts-expect-error: The DO returns a ReadableStream, and the Response constructor accepts it. TODO: Investigate why TS is complaining.
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',

@@ -1,6 +1,5 @@
 import type { SS58String } from 'polkadot-api';
-import { type Observable, Subject, merge } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { type Observable, Subject, map, merge, tap } from 'rxjs';
 import type { ChainAdapter } from '../adapters';
 import { Balance } from '../models/Balance';
 

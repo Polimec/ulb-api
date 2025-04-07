@@ -9,14 +9,14 @@
   },
   "dependencies": {
     "@polkadot-api/descriptors": "file:.papi/descriptors",
-    "@scalar/hono-api-reference": "^0.7.4",
+    "@scalar/hono-api-reference": "^0.8.0",
     "@std/uuid": "npm:@jsr/std__uuid",
     "hono": "^4.7.5",
     "polkadot-api": "^1.9.9"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "wrangler": "^4.6.0"
+    "wrangler": "^4.7.2"
   },
   "packageManager": "bun@1.2.8"
 }

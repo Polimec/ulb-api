@@ -1,7 +1,6 @@
 import { generate } from '@std/uuid/unstable-v7';
 import type { SS58String } from 'polkadot-api';
-import { type Observable, fromEvent, interval } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { type Observable, fromEvent, interval, takeUntil } from 'rxjs';
 import { SSEMessage } from '../models';
 import type { BalanceUpdate } from './balance';
 

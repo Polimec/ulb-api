@@ -2,8 +2,7 @@ import { XcmV3Junctions, polimec } from '@polkadot-api/descriptors';
 import { type PolkadotClient, type SS58String, type TypedApi, createClient } from 'polkadot-api';
 import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 import { getWsProvider } from 'polkadot-api/ws-provider/web';
-import { EMPTY, Observable, from } from 'rxjs'; // Added EMPTY
-import { catchError, filter, map } from 'rxjs/operators';
+import { Observable, catchError, filter, from, map } from 'rxjs';
 import { BaseChainAdapter } from './base';
 
 /**

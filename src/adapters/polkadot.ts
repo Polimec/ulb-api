@@ -2,8 +2,7 @@ import { dot } from '@polkadot-api/descriptors';
 import { type PolkadotClient, type SS58String, type TypedApi, createClient } from 'polkadot-api';
 import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 import { getWsProvider } from 'polkadot-api/ws-provider/web';
-import { EMPTY, Observable, from } from 'rxjs';
-import { catchError, filter, map } from 'rxjs/operators';
+import { Observable, catchError, from, map } from 'rxjs';
 import { BaseChainAdapter } from './base';
 
 /**
