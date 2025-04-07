@@ -11,12 +11,12 @@ import { BaseChainAdapter } from './base';
 export class HydrationAdapter extends BaseChainAdapter {
   private client: PolkadotClient | null = null;
   private api: TypedApi<typeof hydration> | null = null;
-  readonly name = 'Hydration';
+  readonly name = 'hydration';
 
   /**
    * The RPC endpoint for the Hydration chain
    */
-  private readonly endpoints = ['wss://hydration.ibp.network'];
+  private readonly endpoints = ['wss://hydration.ibp.network', 'wss://hydration.dotters.network'];
 
   /**
    * The token ID for DOT on Hydration.

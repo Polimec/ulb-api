@@ -2,7 +2,7 @@ import { XcmV3Junctions, polimec } from '@polkadot-api/descriptors';
 import { type PolkadotClient, type SS58String, type TypedApi, createClient } from 'polkadot-api';
 import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat';
 import { getWsProvider } from 'polkadot-api/ws-provider/web';
-import { Observable, catchError, filter, from, map } from 'rxjs';
+import { Observable, catchError, from, map } from 'rxjs';
 import { BaseChainAdapter } from './base';
 
 /**
@@ -11,12 +11,12 @@ import { BaseChainAdapter } from './base';
 export class PolimecAdapter extends BaseChainAdapter {
   private client: PolkadotClient | null = null;
   private api: TypedApi<typeof polimec> | null = null;
-  readonly name = 'Polimec';
+  readonly name = 'polimec';
 
   /**
    * The RPC endpoint for the Polimec chain
    */
-  private readonly endpoints = ['wss://rpc.polimec.org'];
+  private readonly endpoints = ['wss://rpc.polimec.org', 'wss://polimec.dotters.network'];
 
   /**
    * Connect to the Polimec chain
@@ -62,16 +62,10 @@ export class PolimecAdapter extends BaseChainAdapter {
         accountId,
       ),
     ).pipe(
-      // ForeignAssets.Account returns the full account info or undefined if no account
-      // Filter out undefined cases (account doesn't exist for this asset)
-      filter(
-        (accountInfo): accountInfo is NonNullable<typeof accountInfo> => accountInfo !== undefined,
-      ),
-      map((accountInfo) => accountInfo.balance), // Extract the balance
+      map((accountInfo) => (accountInfo ? accountInfo.balance : 0n)),
       catchError((error) => {
         this.logError(`Error watching balance for ${accountId} on ${this.name}`, error);
-        throw error; // Re-throw
-        // return EMPTY;
+        throw error; // Re-throw the error to propagate it to the subscriber
       }),
     );
 

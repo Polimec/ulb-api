@@ -11,7 +11,7 @@ import { BaseChainAdapter } from './base';
 export class PolkadotAdapter extends BaseChainAdapter {
   private client: PolkadotClient | null = null;
   private api: TypedApi<typeof dot> | null = null;
-  readonly name = 'Polkadot';
+  readonly name = 'polkadot';
 
   /**
    * The RPC endpoints for the Polkadot chain
