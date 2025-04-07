@@ -1,7 +1,13 @@
 import { DurableObject } from 'cloudflare:workers';
 import type { SS58String } from 'polkadot-api';
 import { type Observable, shareReplay } from 'rxjs';
-import { HydrationAdapter, PolimecAdapter, PolkadotAdapter } from '../adapters';
+import {
+  type ChainAdapter,
+  HydrationAdapter,
+  PolimecAdapter,
+  PolkadotAdapter,
+  PolkadotAssetHub,
+} from '../adapters';
 import { BalanceService, type BalanceUpdate, StreamService } from '../services';
 
 /**
@@ -9,9 +15,8 @@ import { BalanceService, type BalanceUpdate, StreamService } from '../services';
  * for a specific client connection
  */
 export class Listener extends DurableObject<Env> {
-  private polkadotAdapter = new PolkadotAdapter();
-  private polimecAdapter = new PolimecAdapter();
-  private hydrationAdapter = new HydrationAdapter();
+  // Adapters for different chains
+  private adapters: ChainAdapter[];
   private balanceService: BalanceService;
   private streamService: StreamService;
   private initialized = false;
@@ -24,11 +29,15 @@ export class Listener extends DurableObject<Env> {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
 
-    this.balanceService = new BalanceService([
-      this.polkadotAdapter,
-      this.polimecAdapter,
-      this.hydrationAdapter,
-    ]);
+    // Initialize adapters for different chains
+    this.adapters = [
+      new PolkadotAdapter(),
+      new PolimecAdapter(),
+      new HydrationAdapter(),
+      new PolkadotAssetHub(),
+    ];
+
+    this.balanceService = new BalanceService(this.adapters);
 
     this.streamService = new StreamService({
       heartbeatInterval: 30_000,
@@ -51,13 +60,9 @@ export class Listener extends DurableObject<Env> {
     }
 
     try {
-      await Promise.all([
-        this.polkadotAdapter.connect(),
-        this.polimecAdapter.connect(),
-        this.hydrationAdapter.connect(),
-      ]);
+      await Promise.all(this.adapters.map((adapter) => adapter.connect()));
       this.initialized = true;
-      console.log("[Listener DO] Initialized adapters for account scope.");
+      console.log('[Listener DO] Initialized adapters for account scope.');
     } catch (error) {
       console.error('[Listener DO] Failed to initialize chain connections:', error);
       // Potentially destroy self or signal error state if initialization fails critically
@@ -130,11 +135,7 @@ export class Listener extends DurableObject<Env> {
     this.sharedBalanceObservable = null;
 
     // Disconnect adapters
-    await Promise.allSettled([
-      this.polkadotAdapter.disconnect(),
-      this.polimecAdapter.disconnect(),
-      this.hydrationAdapter.disconnect(),
-    ]);
+    await Promise.allSettled(this.adapters.map((adapter) => adapter.disconnect()));
 
     this.initialized = false;
     this.accountId = null; // Reset accountId
