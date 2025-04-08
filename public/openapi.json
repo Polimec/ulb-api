@@ -63,7 +63,7 @@
                   },
                   "balanceUpdateEvent": {
                     "summary": "Balance update event",
-                    "value": "event: DOT\nid: 0195cdd1-1e28-773f-9d08-22a281c17000\ndata: {\"total\":\"125000000000\",\"chains\":{\"Polkadot\":\"100000000000\",\"Polimec\":\"25000000000\",\"Hydration\":\"0\"}}\n"
+                    "value": "event: DOT\nid: 0195cdd1-1e28-773f-9d08-22a281c17000\ndata: {\"total\":\"125000000000\",\"chains\":{\"polkadot\":\"100000000000\",\"polkadot_assethub\":\"0\",\"polimec\":\"25000000000\",\"hydration\":\"0\"}}\n"
                   },
                   "heartbeatEvent": {
                     "summary": "Heartbeat event",
@@ -122,36 +122,10 @@
                 "description": "String data payload for accountId and heartbeat events"
               },
               {
-                "$ref": "#/components/schemas/Balance",
+                "$ref": "#/components/schemas/SSEMessage",
                 "description": "Balance information for DOT events"
               }
             ]
-          }
-        }
-      },
-      "Balance": {
-        "type": "object",
-        "description": "Detailed balance information for an account across multiple chains",
-        "properties": {
-          "Polkadot": {
-            "type": "string",
-            "description": "The balance on the Polkadot network (as a string to accommodate large integers)",
-            "examples": ["1250000000000"]
-          },
-          "Polimec": {
-            "type": "string",
-            "description": "The balance on the Polimec network (as a string to accommodate large integers)",
-            "examples": ["4500000000000"]
-          },
-          "Hydration": {
-            "type": "string",
-            "description": "The balance on the Hydration network (as a string to accommodate large integers)",
-            "examples": ["300000000000"]
-          },
-          "total": {
-            "type": "string",
-            "description": "The total balance across all networks (as a string to accommodate large integers)",
-            "examples": ["6050000000000"]
           }
         }
       },
@@ -177,7 +151,7 @@
               },
               {
                 "type": "object",
-                "description": "Balance information for DOT events",
+                "description": "Balance information for DOT",
                 "properties": {
                   "total": {
                     "type": "string",
@@ -188,19 +162,24 @@
                     "type": "object",
                     "description": "Balance breakdown by chain",
                     "properties": {
-                      "Polkadot": {
+                      "polkadot": {
                         "type": "string",
-                        "description": "The balance on the Polkadot network",
+                        "description": "The balance on Polkadot",
                         "examples": ["1250000000000"]
                       },
-                      "Polimec": {
+                      "polkadot_assethub": {
                         "type": "string",
-                        "description": "The balance on the Polimec network",
+                        "description": "The balance on Polkadot Asset Hub",
+                        "examples": ["0"]
+                      },
+                      "polimec": {
+                        "type": "string",
+                        "description": "The balance on Polimec",
                         "examples": ["4500000000000"]
                       },
-                      "Hydration": {
+                      "hydration": {
                         "type": "string",
-                        "description": "The balance on the Hydration network",
+                        "description": "The balance on Hydration",
                         "examples": ["300000000000"]
                       }
                     }
