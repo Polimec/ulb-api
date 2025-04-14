@@ -11,6 +11,7 @@ import { BaseChainAdapter } from './base';
 export class PolkadotAssetHub extends BaseChainAdapter {
   private client: PolkadotClient | null = null;
   private api: TypedApi<typeof pah> | null = null;
+  private ED = 0n;
   readonly name = 'polkadot_assethub';
 
   /**
@@ -24,10 +25,11 @@ export class PolkadotAssetHub extends BaseChainAdapter {
   /**
    * Connect to the Polkadot Asset Hub chain
    */
-  connect(): void {
+  async connect(): Promise<void> {
     try {
       this.client = createClient(withPolkadotSdkCompat(getWsProvider(this.endpoints)));
       this.api = this.client.getTypedApi(pah);
+      this.ED = await this.api.constants.Balances.ExistentialDeposit();
       console.log(`[${this.name}] Connected`);
     } catch (error) {
       this.logError('Failed to connect to Polkadot Asset Hub', error);
@@ -60,7 +62,7 @@ export class PolkadotAssetHub extends BaseChainAdapter {
       });
     }
     const balanceObservable = from(this.api.query.System.Account.watchValue(accountId)).pipe(
-      map((accountInfo) => (accountInfo ? accountInfo.data.free : 0n)),
+      map((accountInfo) => (accountInfo ? accountInfo.data.free - this.ED : 0n)),
       catchError((error) => {
         this.logError(`Error watching balance for ${accountId} on ${this.name}`, error);
         throw error; // Re-throw the error to propagate it to the subscriber

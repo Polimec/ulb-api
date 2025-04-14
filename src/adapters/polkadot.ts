@@ -11,6 +11,7 @@ import { BaseChainAdapter } from './base';
 export class PolkadotAdapter extends BaseChainAdapter {
   private client: PolkadotClient | null = null;
   private api: TypedApi<typeof dot> | null = null;
+  private ED = 0n;
   readonly name = 'polkadot';
 
   /**
@@ -21,11 +22,12 @@ export class PolkadotAdapter extends BaseChainAdapter {
   /**
    * Connect to the Polkadot chain
    */
-  connect(): void {
+  async connect(): Promise<void> {
     try {
       this.client = createClient(withPolkadotSdkCompat(getWsProvider(this.endpoints)));
       this.api = this.client.getTypedApi(dot);
       console.log(`[${this.name}] Connected`);
+      this.ED = await this.api.constants.Balances.ExistentialDeposit();
     } catch (error) {
       this.logError('Failed to connect to Polkadot', error);
       throw error; // Re-throw to allow handling upstream
@@ -65,7 +67,7 @@ export class PolkadotAdapter extends BaseChainAdapter {
 
     // Create an observable directly from the Polkadot API call
     const balanceObservable = from(this.api.query.System.Account.watchValue(accountId)).pipe(
-      map((accountInfo) => accountInfo.data.free),
+      map((accountInfo) => accountInfo.data.free - this.ED),
       catchError((error) => {
         this.logError(`Error watching balance for ${accountId} on ${this.name}`, error);
         // Decide how to handle errors here. Re-throwing allows BalanceService to catch it.

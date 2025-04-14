@@ -12,7 +12,7 @@
     "@scalar/hono-api-reference": "^0.8.1",
     "@std/uuid": "npm:@jsr/std__uuid",
     "hono": "^4.7.6",
-    "polkadot-api": "^1.9.10"
+    "polkadot-api": "^1.9.11"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
