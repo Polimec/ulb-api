@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "polkadot-cloud-sse",
   "main": "src/index.ts",
-  "compatibility_date": "2025-03-21",
+	"compatibility_date": "2025-04-14",
   "assets": {
     "directory": "public"
   },
